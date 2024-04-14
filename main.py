@@ -34,6 +34,7 @@ min_obstacles = 2  # minimum number of obstacles on the screen at a time
 
 # Score
 score = 0
+high_score = 0
 font = pygame.font.Font(None, 36)
 
 # Load images
@@ -56,11 +57,16 @@ def draw_obstacle(x, y, image):
 
 # Function to display game over popup
 def game_over():
+    global high_score
+    if score > high_score:
+        high_score = score
     popup_font = pygame.font.Font(None, 50)
     game_over_text = popup_font.render("Game Over", True, WHITE)
     screen.blit(game_over_text, (SCREEN_WIDTH // 2 - 120, SCREEN_HEIGHT // 2 - 50))
     score_text = font.render("Score: " + str(score), True, WHITE)
     screen.blit(score_text, (SCREEN_WIDTH // 2 - 60, SCREEN_HEIGHT // 2))
+    high_score_text = font.render("High Score: " + str(high_score), True, WHITE)
+    screen.blit(high_score_text, (SCREEN_WIDTH - 200, 10))
     pygame.display.update()
 
     while True:
@@ -148,6 +154,10 @@ while running:
     # Draw score
     score_text = font.render("Score: " + str(score), True, WHITE)
     screen.blit(score_text, (10, 10))
+
+    # Draw high score
+    high_score_text = font.render("High Score: " + str(high_score), True, WHITE)
+    screen.blit(high_score_text, (SCREEN_WIDTH - 200, 10))
 
     pygame.display.flip()
     clock.tick(60)
