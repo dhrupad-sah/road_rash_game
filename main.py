@@ -18,7 +18,7 @@ BLACK = (0, 0, 0)
 
 # Player settings
 player_width = 60
-player_height = 100
+player_height = 60
 player_x = SCREEN_WIDTH // 2 - player_width // 2
 player_y = SCREEN_HEIGHT - player_height - 20
 player_speed = 8
@@ -40,16 +40,19 @@ font = pygame.font.Font(None, 36)
 player_image = pygame.image.load("bike.png").convert_alpha()
 player_image = pygame.transform.scale(player_image, (player_width, player_height))
 
-obstacle_image = pygame.image.load("roadblock.png").convert_alpha()
-obstacle_image = pygame.transform.scale(obstacle_image, (obstacle_width, obstacle_height))
+roadblock_image = pygame.image.load("roadblock.png").convert_alpha()
+roadblock_image = pygame.transform.scale(roadblock_image, (obstacle_width, obstacle_height))
+
+car_image = pygame.image.load("car.png").convert_alpha()
+car_image = pygame.transform.scale(car_image, (obstacle_width, obstacle_height))
 
 # Function to draw the player
 def draw_player(x, y):
     screen.blit(player_image, (x, y))
 
 # Function to draw obstacles
-def draw_obstacle(x, y):
-    screen.blit(obstacle_image, (x, y))
+def draw_obstacle(x, y, image):
+    screen.blit(image, (x, y))
 
 # Function to display game over popup
 def game_over():
@@ -73,25 +76,25 @@ def game_over():
 def generate_obstacle():
     obstacle_x = random.randint(0, SCREEN_WIDTH - obstacle_width)
     obstacle_y = -obstacle_height
+    obstacle_type = random.choice(["roadblock", "car"])  # Randomly choose between roadblock and car
+    if obstacle_type == "roadblock":
+        image = roadblock_image
+    else:
+        image = car_image
     if not any(obstacle[0] <= obstacle_x <= obstacle[0] + obstacle_width or
                obstacle_x <= obstacle[0] <= obstacle_x + obstacle_width
                for obstacle in obstacles):
-        obstacles.append([obstacle_x, obstacle_y])
-
-# Main game loop
-running = True
-clock = pygame.time.Clock()
-obstacles = []
+        obstacles.append([obstacle_x, obstacle_y, image])
 
 # Function to increase obstacle speed
 def increase_obstacle_speed():
     global obstacle_speed
     obstacle_speed += 0.1
 
-# Function to add minimum number of obstacles
-def add_min_obstacles():
-    while len(obstacles) < min_obstacles:
-        generate_obstacle()
+# Main game loop
+running = True
+clock = pygame.time.Clock()
+obstacles = []
 
 while running:
     screen.fill(GRAY)
@@ -115,7 +118,8 @@ while running:
     # Generate obstacles
     current_time = pygame.time.get_ticks()
     if current_time - last_obstacle_time > obstacle_interval:
-        add_min_obstacles()
+        while len(obstacles) < min_obstacles:
+            generate_obstacle()
         if len(obstacles) < max_obstacles:
             generate_obstacle()
             last_obstacle_time = current_time
@@ -123,7 +127,7 @@ while running:
     # Move and draw obstacles
     for obstacle in obstacles:
         obstacle[1] += obstacle_speed
-        draw_obstacle(obstacle[0], obstacle[1])
+        draw_obstacle(obstacle[0], obstacle[1], obstacle[2])
         if obstacle[1] > SCREEN_HEIGHT:
             obstacles.remove(obstacle)
             score += 1
